@@ -103,7 +103,7 @@ class Windows(Platform):
             b"\n".join(
                 [
                     b"Add-Type -TypeDefinition $source -Language CSharp",
-                    b'[ConPtyShellMainClass]::ConPtyShellMain(@("", 0, 24, 80, "powershell.exe")); exit',
+                    b'[ConPtyShell]::SpawnConPtyShell(); exit',
                 ]
             )
             + b"\n"

