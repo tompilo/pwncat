@@ -33,6 +33,6 @@ tabledata==1.1.2
 tcolorpy==0.0.5
 typepy==1.1.1
 typing-extensions==3.7.4.2
-urllib3==1.25.9
+urllib3==1.26.5
 wcwidth==0.1.9
 python-rapidjson==0.9.1
